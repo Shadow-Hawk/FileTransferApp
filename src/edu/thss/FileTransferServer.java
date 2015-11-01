@@ -1,12 +1,14 @@
 package edu.thss;
 
-import java.net.ServerSocket;
+import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 public class FileTransferServer {
-    private ServerSocket serverSocket;
+    private ServerSocketChannel serverSocketChannel;
 
     public FileTransferServer() {
 
@@ -15,16 +17,14 @@ public class FileTransferServer {
 
     private void startServer(int port) {
         try {
-            serverSocket = new ServerSocket(port);
-            System.out.println("Server started at port :" + port);
+            serverSocketChannel = ServerSocketChannel.open().bind(new InetSocketAddress(port)); 
+            System.out.println("Server started at port: " + port);
             while (true) {
-                Socket client = serverSocket.accept(); // blocked & waiting for income socket
-                System.out.println("Just connected to " + client.getRemoteSocketAddress());
+                SocketChannel client = serverSocketChannel.accept(); // blocked & waiting for income socket
+                System.out.println("Just connected to " + client.getRemoteAddress());
                 ExecutorService executorService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
-                executorService.submit(new FileReceiveHandler(client));
-
-                //new Thread(new FileReceiveHandler(client)).start();
-                System.out.println("while...... ");
+                executorService.submit(new FileReceiveHandler(client.socket()));
+                System.out.println("Receiving information...");
             }
 
         } catch (Exception e) {
@@ -35,6 +35,7 @@ public class FileTransferServer {
 
     public void run() {
         Thread startThread = new Thread(new Runnable() {
+            @Override
             public void run() {
                 startServer(Config.getPort());
             }

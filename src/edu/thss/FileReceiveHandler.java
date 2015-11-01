@@ -6,26 +6,11 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 
 public class FileReceiveHandler implements Runnable{
     private Socket _mSocket;
     public FileReceiveHandler(Socket client) {
         this._mSocket = client;
-    }
-
-
-    private void constructDirectories(String str) {
-        String fullFileName = Config.getDestinationDir() + File.separator + str;
-        Path fullPath = Paths.get(fullFileName);
-        try {
-            Files.createDirectories(fullPath.getParent());
-        } catch (IOException e) {
-            e.printStackTrace();
-            throw new RuntimeException(e);
-        }
     }
 
     @Override
@@ -37,7 +22,7 @@ public class FileReceiveHandler implements Runnable{
             input = new DataInputStream(_mSocket.getInputStream());
             String fileName = input.readUTF();
             long fileLength = input.readLong(); // number of total bytes
-            constructDirectories(fileName);
+            DirectoryManager.constructDirectories(fileName);
             File file = new File(Config.getDestinationDir() + File.separator + fileName);
             output = new BufferedOutputStream(new FileOutputStream(file));
             //System.out.println("Received File Name = " + fileName);

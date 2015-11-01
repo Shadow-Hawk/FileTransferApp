@@ -17,25 +17,6 @@ import java.util.concurrent.Executors;
 
 public class FileTransferClient {
 
-
-//    public void send() {
-//
-//        File f = new File("D:\\Downloads\\couchbase-server-enterprise_2.5.1_x86_64.setup.exe"); // TODO
-//        File f2 = new File("D:\\Downloads\\CentOS-6.6-i386-bin-DVD1.iso"); // TODO
-//        SocketAddress address = new InetSocketAddress(getServer(), getPort());
-//        Thread task = new Thread(new FileSendHandler(f, address));
-//        Thread t2 = new Thread(new FileSendHandler(f2, address));
-//        task.start();
-//        t2.start();
-//        try {
-//            task.join();
-//            t2.join();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//    }
-
     public void send() {
         SocketAddress address = new InetSocketAddress(Config.getDestinationHost(), Config.getPort());
         List<File> files = new ArrayList<>();
@@ -72,10 +53,10 @@ public class FileTransferClient {
         } catch(IOException e) {
             e.printStackTrace();
         }
-        return;
     }
 
     public static void main(String[] args) {
+        System.out.println("Start client"); 
         FileTransferClient client = new FileTransferClient();
         long start = System.currentTimeMillis();
 
@@ -83,8 +64,8 @@ public class FileTransferClient {
 
         long end = System.currentTimeMillis();
 
-        System.out.println("end-start = " + (end - start));
-        System.out.println("end main ");
+        System.out.println("Execution time: " + (end - start) + "ms");
+        System.out.println("Terminating");
     }
 
 }
