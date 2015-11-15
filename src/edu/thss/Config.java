@@ -7,6 +7,8 @@ public class Config {
 
     private static ResourceBundle resourceBundle = ResourceBundle.getBundle("config");
 
+    public static String ZipExtension = ".zip";
+    public static int ZipBuffer = 1024;
     public static int getPort() {
         return Integer.parseInt(resourceBundle.getString("port"));
     }
@@ -24,6 +26,18 @@ public class Config {
     }
 
     public static int getBufferSize() {
-        return Integer.parseInt(resourceBundle.getString("BufferSize"));
+        return Integer.parseInt(resourceBundle.getString("BufferSize")) * 1024;
+    }
+
+    public static int getSocketBufferSize() {
+        return Integer.parseInt(resourceBundle.getString("SocketBufferSize")) * 1024;
+    }
+
+    public static int getThreadCount() {
+        return Integer.parseInt(resourceBundle.getString("ThreadCount"));
+    }
+
+    public static String getZipFile() {
+        return resourceBundle.getString("ZipFile");
     }
 }

@@ -38,13 +38,15 @@ public class FileSendHandler implements Runnable {
                 throw new RuntimeException("Could not completely read file " + selectedFile.getName() + " as it is too long");
             }
 
-
+            mSocket.setSendBufferSize(Config.getSocketBufferSize());
+            mSocket.setReceiveBufferSize(Config.getSocketBufferSize());
+            mSocket.setTcpNoDelay(true);
+            mSocket.setSoLinger(true, 60);
             mSocket.connect(address);
 
-            //mSocket.setSoLinger(true, 60);
             dout = new DataOutputStream(mSocket.getOutputStream());
             // now we start to send the file meta info.
-            dout.writeUTF(selectedFile.getAbsolutePath().substring(Config.getSourceDir().length()));
+            dout.writeUTF(selectedFile.getAbsolutePath().substring(Config.getSourceDir().length()).replaceAll("\\\\", "/"));
             dout.writeLong(length);
             dout.flush();
 
@@ -80,10 +82,10 @@ public class FileSendHandler implements Runnable {
             e.printStackTrace();
         } finally {
             try {
-                //dout.close();
+                dout.close();
                 is.close();
-//                if (!mSocket.isClosed())
-//                    mSocket.close();
+                if (!mSocket.isClosed())
+                    mSocket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }

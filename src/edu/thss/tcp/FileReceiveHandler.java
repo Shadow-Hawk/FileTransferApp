@@ -2,6 +2,7 @@ package edu.thss.tcp;
 
 import edu.thss.Config;
 import edu.thss.DirectoryManager;
+import edu.thss.ZipUtil;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
@@ -10,20 +11,23 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-public class FileReceiveHandler implements Runnable{
+public class FileReceiveHandler implements Runnable {
     private Socket _mSocket;
+
     public FileReceiveHandler(Socket client) {
         this._mSocket = client;
     }
 
     @Override
     public void run() {
+        String fileName = "";
         BufferedOutputStream output = null;
         DataInputStream input = null;
         try {
+            //System.out.println("_mSocket getReceiveBufferSize= " + _mSocket.getReceiveBufferSize());
             // get file meta information
             input = new DataInputStream(_mSocket.getInputStream());
-            String fileName = input.readUTF();
+            fileName = input.readUTF();
             long fileLength = input.readLong(); // number of total bytes
             DirectoryManager.constructDirectories(fileName);
             File file = new File(Config.getDestinationDir() + File.separator + fileName);
@@ -47,6 +51,9 @@ public class FileReceiveHandler implements Runnable{
                 //System.out.println("File Receive Task has done correctly");
             }
 
+            if (fileName.endsWith(Config.getZipFile() + Config.ZipExtension)) {
+                ZipUtil.unzip(file.getPath(), Config.getDestinationDir() + File.separator + fileName.substring(0, fileName.lastIndexOf(Config.ZipExtension)) + File.separator);
+            }
             // tell client to close the socket now, we already receive the file successfully!!
 //            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(_mSocket.getOutputStream()));
 //            bufferedWriter.write("DONE\r\n");
@@ -59,6 +66,9 @@ public class FileReceiveHandler implements Runnable{
                 output.close();
                 input.close();
                 _mSocket.close();
+                if (fileName.endsWith(Config.getZipFile() + Config.ZipExtension)) {
+                    DirectoryManager.cleanTempFile(Config.getDestinationDir(), fileName);
+                }
             } catch (IOException e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);

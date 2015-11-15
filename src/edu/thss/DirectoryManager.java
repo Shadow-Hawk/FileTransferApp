@@ -31,4 +31,13 @@ public final class DirectoryManager {
             throw new RuntimeException(e);
         }
     }
+    public static void cleanTempFile(String folder, String fileName) {
+        try {
+
+            Files.deleteIfExists(Paths.get(folder + File.separator + fileName));
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException(e);
+        }
+    }
 }
