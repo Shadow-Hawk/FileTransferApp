@@ -1,4 +1,7 @@
-package edu.thss;
+package edu.thss.tcp;
+
+import edu.thss.Config;
+import edu.thss.DirectoryManager;
 
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;

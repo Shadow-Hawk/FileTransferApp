@@ -1,4 +1,6 @@
-package edu.thss;
+package edu.thss.tcp;
+
+import edu.thss.Config;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

@@ -1,4 +1,6 @@
-package edu.thss;
+package edu.thss.tcp;
+
+import edu.thss.Config;
 
 import java.net.InetSocketAddress;
 import java.net.Socket;
