@@ -33,11 +33,6 @@ public class FileSendHandler implements Runnable {
 
             // Get the size of the file
             long length = selectedFile.length();
-            if (length > Long.MAX_VALUE) {
-                System.err.println("Too large");
-                throw new RuntimeException("Could not completely read file " + selectedFile.getName() + " as it is too long");
-            }
-
             mSocket.setSendBufferSize(Config.getSocketBufferSize());
             mSocket.setReceiveBufferSize(Config.getSocketBufferSize());
             mSocket.setTcpNoDelay(true);
@@ -82,8 +77,8 @@ public class FileSendHandler implements Runnable {
             e.printStackTrace();
         } finally {
             try {
-                dout.close();
-                is.close();
+                if (dout != null) dout.close();
+                if (is != null) is.close();
                 if (!mSocket.isClosed())
                     mSocket.close();
             } catch (IOException e) {

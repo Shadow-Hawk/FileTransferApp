@@ -3,8 +3,6 @@ package edu.thss.tcp;
 import edu.thss.Config;
 
 import java.net.InetSocketAddress;
-import java.net.Socket;
-import java.net.SocketOptions;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.ExecutorService;

@@ -38,7 +38,7 @@ public class FileReceiveHandler implements Runnable {
             // start to receive the content of the file and write them
             byte[] content = new byte[Config.getBufferSize()];
             long offset = 0;
-            int numReadBytes = 0;
+            int numReadBytes;
             while (offset < fileLength && (numReadBytes = input.read(content)) > 0) {
                 output.write(content, 0, numReadBytes);
                 offset += numReadBytes;
@@ -63,8 +63,8 @@ public class FileReceiveHandler implements Runnable {
         } finally {
             // close the file and socket
             try {
-                output.close();
-                input.close();
+                if (output != null) output.close();
+                if (input != null) input.close();
                 _mSocket.close();
                 if (fileName.endsWith(Config.getZipFile() + Config.ZipExtension)) {
                     DirectoryManager.cleanTempFile(Config.getDestinationDir(), fileName);

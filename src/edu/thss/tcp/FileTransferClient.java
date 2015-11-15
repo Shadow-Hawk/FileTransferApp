@@ -46,7 +46,7 @@ public class FileTransferClient {
             for (Path path : stream) {
                 if(path.toFile().isDirectory()) {
                     //if (path.endsWith("huge_file") || path.endsWith("several_normal_files")) continue;
-                    if (path.endsWith("huge_file")) continue;
+                    //if (path.endsWith("huge_file")) continue;
                     if (path.endsWith(Config.getZipFile())) {
                         ZipUtil.zip(path.toString(), path.toString() + Config.ZipExtension);
                         files.add(Paths.get(path.toString() + Config.ZipExtension).toFile());
