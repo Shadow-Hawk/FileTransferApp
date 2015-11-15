@@ -1,5 +1,6 @@
 package edu.thss.udp;
 
+import edu.thss.Config;
 import edu.thss.DirectoryManager;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -25,7 +26,8 @@ public final class DataReceiveHandler implements Runnable {
 
     @Override
     public void run() {
-        File destination = new File(DirectoryManager.constructDirectories(this.destinationPath)); 
+//        File destination = new File(DirectoryManager.constructDirectories(this.destinationPath));
+        File destination = new File(Config.getDestinationDir() + File.separator + this.destinationPath);
         try(FileChannel fileChannel = new FileOutputStream(destination).getChannel()) {
             buffer.flip(); 
             fileChannel.write(buffer);

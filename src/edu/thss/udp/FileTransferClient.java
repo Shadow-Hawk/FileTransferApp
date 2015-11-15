@@ -31,8 +31,8 @@ public class FileTransferClient {
     }
     public static void run(String destinationHost, int port, String directory) {
         try {
-            InetSocketAddress serverAddress = new InetSocketAddress(destinationHost, port);
-            ExecutorService exService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            final InetSocketAddress serverAddress = new InetSocketAddress(destinationHost, port);
+            final ExecutorService exService = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             FileVisitor<Path> fileVisitor = new SimpleFileVisitor<Path>() {
                 @Override
                 public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
