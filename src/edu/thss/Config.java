@@ -9,12 +9,17 @@ public class Config {
 
     public static String ZipExtension = ".zip";
     public static int ZipBuffer = 1024;
-    public static int getPort() {
-        return Integer.parseInt(resourceBundle.getString("port"));
+
+    public static int getDestPort() {
+        return Integer.parseInt(resourceBundle.getString("DestPort"));
     }
 
     public static String getDestinationHost() {
         return resourceBundle.getString("DestHost");
+    }
+
+    public static String getSourceHost() {
+        return resourceBundle.getString("SrcHost");
     }
 
     public static String getSourceDir() {
@@ -40,4 +45,6 @@ public class Config {
     public static String getZipFile() {
         return resourceBundle.getString("ZipFile");
     }
+
+    public static int getSrcUdpPort() { return Integer.parseInt(resourceBundle.getString("SrcUdpPort")); }
 }

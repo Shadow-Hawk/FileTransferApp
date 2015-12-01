@@ -1,15 +1,15 @@
 package edu.thss.tcp;
 
-import edu.thss.Config;
-import edu.thss.DirectoryManager;
-import edu.thss.ZipUtil;
-
 import java.io.BufferedOutputStream;
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+
+import edu.thss.Config;
+import edu.thss.DirectoryManager;
+import edu.thss.ZipUtil;
 
 public class FileReceiveHandler implements Runnable {
     private Socket _mSocket;
@@ -31,7 +31,7 @@ public class FileReceiveHandler implements Runnable {
             long fileLength = input.readLong(); // number of total bytes
             DirectoryManager.constructDirectories(fileName);
             File file = new File(Config.getDestinationDir() + File.separator + fileName);
-            output = new BufferedOutputStream(new FileOutputStream(file));
+            output = new BufferedOutputStream(new FileOutputStream(file), Config.getBufferSize());
             //System.out.println("Received File Name = " + fileName);
             //System.out.println("Received File size = " + fileLength);
 
@@ -43,21 +43,18 @@ public class FileReceiveHandler implements Runnable {
                 output.write(content, 0, numReadBytes);
                 offset += numReadBytes;
             }
+
             //System.out.println("numReadBytes = " + offset);
             if (offset < fileLength) {
                 //numReadBytes = input.read(content);
                 throw new RuntimeException("File content error at server side");
             } else {
-                //System.out.println("File Receive Task has done correctly");
+                output.flush();
             }
 
             if (fileName.endsWith(Config.getZipFile() + Config.ZipExtension)) {
                 ZipUtil.unzip(file.getPath(), Config.getDestinationDir() + File.separator + fileName.substring(0, fileName.lastIndexOf(Config.ZipExtension)) + File.separator);
             }
-            // tell client to close the socket now, we already receive the file successfully!!
-//            BufferedWriter bufferedWriter = new BufferedWriter(new OutputStreamWriter(_mSocket.getOutputStream()));
-//            bufferedWriter.write("DONE\r\n");
-//            bufferedWriter.flush();
         } catch (Exception e) {
             throw new RuntimeException(e);
         } finally {

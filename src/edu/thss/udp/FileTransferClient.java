@@ -27,7 +27,7 @@ import java.util.logging.Logger;
  */
 public class FileTransferClient {
     public static void main(String args[]) {
-        FileTransferClient.run(Config.getDestinationHost(), Config.getPort(), Config.getSourceDir()); 
+        FileTransferClient.run(Config.getDestinationHost(), Config.getDestPort(), Config.getSourceDir());
     }
     public static void run(String destinationHost, int port, String directory) {
         try {

@@ -2,11 +2,9 @@ package edu.thss.udp;
 
 import edu.thss.Config;
 import java.io.IOException;
-import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
 import java.nio.channels.DatagramChannel;
-import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.logging.Level;
@@ -22,7 +20,7 @@ import java.util.logging.Logger;
 public class FileTransferServer {
     
     public static void main(String args[]) {
-        FileTransferServer.run(Config.getPort(), Config.getBufferSize()); 
+        FileTransferServer.run(Config.getDestPort(), Config.getBufferSize());
     }
     
     public static void run(int port, int bufferSize) {
