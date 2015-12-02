@@ -15,9 +15,9 @@ public class Main {
             System.exit(-1);
         }
 
-        if ("Server".equalsIgnoreCase(args[0])) {
+        if ("Client".equalsIgnoreCase(args[0])) {
             FileTransferServer.main(args);
-        } else if ("Client".equalsIgnoreCase(args[0])){
+        } else if ("Server".equalsIgnoreCase(args[0])){
             FileTransferClient.main(args);
         } else {
             System.out.println("Invalid arguments '" + args[0] + "'");
