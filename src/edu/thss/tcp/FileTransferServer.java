@@ -5,6 +5,7 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletionService;
@@ -29,12 +30,9 @@ public class FileTransferServer {
             serverSocketChannel.socket().setReceiveBufferSize(Config.getSocketBufferSize());
             System.out.println("Started at port: " + port);
             while (count < total) {
-
                 SocketChannel client = serverSocketChannel.accept(); // blocked & waiting for income socket
-                //System.out.println("Just connected to " + client.getRemoteAddress());
-                join.submit(new FileReceiveHandler(client.socket()), new Object());
+                join.submit(getHandlerImpl(client.socket()), new Object());
                 count++;
-                //System.out.println("Receiving information...");
             }
 
         } catch (Exception e) {
@@ -91,6 +89,14 @@ public class FileTransferServer {
             }
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    private Runnable getHandlerImpl(Socket socket) {
+        if (Config.getHandlerMode() == 1) {
+            return new edu.thss.tcp.nio.FileReceiveHandler(socket);
+        } else {
+            return new FileReceiveHandler(socket);
         }
     }
 

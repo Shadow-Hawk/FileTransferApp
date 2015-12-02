@@ -23,7 +23,7 @@ public class Config {
     }
 
     public static String getSourceDir() {
-        return  resourceBundle.getString("SrcDir");
+        return resourceBundle.getString("SrcDir");
     }
 
     public static String getDestinationDir() {
@@ -46,5 +46,11 @@ public class Config {
         return resourceBundle.getString("ZipFile");
     }
 
-    public static int getSrcUdpPort() { return Integer.parseInt(resourceBundle.getString("SrcUdpPort")); }
+    public static int getSrcUdpPort() {
+        return Integer.parseInt(resourceBundle.getString("SrcUdpPort"));
+    }
+
+    public static int getHandlerMode() {
+        return Integer.parseInt(resourceBundle.getString("HandlerMode"));
+    }
 }

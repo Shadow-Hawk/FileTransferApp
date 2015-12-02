@@ -78,7 +78,7 @@ public class FileTransferClient {
 
         Object result = new Object();
         for (File f : files) {
-            pool.submit(new FileSendHandler(f, address), result);
+            pool.submit(getHandlerImpl(f, address), result);
         }
 
         threadPool.shutdown();
@@ -115,6 +115,14 @@ public class FileTransferClient {
             }
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private Runnable getHandlerImpl(File file, SocketAddress address) {
+        if (Config.getHandlerMode() == 1) {
+            return new edu.thss.tcp.nio.FileSendHandler(file, address);
+        } else {
+            return new FileSendHandler(file, address);
         }
     }
 

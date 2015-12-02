@@ -2,16 +2,17 @@ package edu.thss.tcp;
 
 import edu.thss.Config;
 
+import java.io.BufferedInputStream;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 
 public class FileSendHandler implements Runnable {
-
 
     private File selectedFile;
     private Socket mSocket;
@@ -26,11 +27,9 @@ public class FileSendHandler implements Runnable {
     @Override
     public void run() {
         DataOutputStream dout = null;
-        DataInputStream is = null;
+        InputStream is = null;
 
         try {
-            //System.out.println("Being....");
-
             // Get the size of the file
             long length = selectedFile.length();
             mSocket.setSendBufferSize(Config.getSocketBufferSize());
@@ -45,7 +44,7 @@ public class FileSendHandler implements Runnable {
             dout.writeLong(length);
             dout.flush();
 
-            is = new DataInputStream(new FileInputStream(selectedFile));
+            is = new BufferedInputStream(new FileInputStream(selectedFile), Config.getBufferSize());
             byte[] bytes = new byte[Config.getBufferSize()];
 
             // Read in the bytes
@@ -62,16 +61,6 @@ public class FileSendHandler implements Runnable {
                 throw new IOException("Could not completely transfer file " + selectedFile.getName());
             }
             mSocket.shutdownOutput();
-
-            // receive the file transfer successfully message from connection
-
-//            BufferedInputStream streamReader = new BufferedInputStream(mSocket.getInputStream());
-//            BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(streamReader));
-//            String doneMsg = bufferedReader.readLine();
-//            if (!"DONE".equals(doneMsg)) {
-//                throw new RuntimeException("Done signal not received!!!");
-//            }
-
 
         } catch (IOException e) {
             e.printStackTrace();
