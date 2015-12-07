@@ -31,7 +31,7 @@ public class FileConcatenator {
      * @param totalParts
      */
     public static synchronized void processParts(String fileName, int totalParts) {
-        int part = Integer.parseInt(fileName.substring(fileName.lastIndexOf('_') + 1));
+//        int part = Integer.parseInt(fileName.substring(fileName.lastIndexOf('_') + 1));
 //        System.out.println("part = " + part);
         String originalFileName = fileName.substring(0, fileName.lastIndexOf('.'));
 //        System.out.println("originalFileName = " + originalFileName);
