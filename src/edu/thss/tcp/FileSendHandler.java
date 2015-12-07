@@ -1,24 +1,22 @@
 package edu.thss.tcp;
 
-import edu.thss.Config;
-
 import java.io.BufferedInputStream;
-import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 import java.net.SocketAddress;
 
+import edu.thss.Config;
+
 public class FileSendHandler implements Runnable {
 
-    private File selectedFile;
+    private FileSplit selectedFile;
     private Socket mSocket;
     private SocketAddress address;
 
-    public FileSendHandler(File file, SocketAddress address) {
+    public FileSendHandler(FileSplit file, SocketAddress address) {
         this.address = address;
         this.selectedFile = file;
         mSocket = new Socket();
@@ -30,8 +28,6 @@ public class FileSendHandler implements Runnable {
         InputStream is = null;
 
         try {
-            // Get the size of the file
-            long length = selectedFile.length();
             mSocket.setSendBufferSize(Config.getSocketBufferSize());
             mSocket.setReceiveBufferSize(Config.getSocketBufferSize());
             mSocket.setTcpNoDelay(true);
@@ -39,25 +35,31 @@ public class FileSendHandler implements Runnable {
             mSocket.connect(address);
 
             dout = new DataOutputStream(mSocket.getOutputStream());
+            // Get the size of the file or part of file
+            long length = selectedFile.getLimit() - selectedFile.getPosition();
             // now we start to send the file meta info.
-            dout.writeUTF(selectedFile.getAbsolutePath().substring(Config.getSourceDir().length()).replaceAll("\\\\", "/"));
+            dout.writeByte(selectedFile.getTotal());
+            dout.writeUTF(selectedFile.getName());
             dout.writeLong(length);
             dout.flush();
 
-            is = new BufferedInputStream(new FileInputStream(selectedFile), Config.getBufferSize());
+            is = new BufferedInputStream(new FileInputStream(selectedFile.getFile()), Config.getBufferSize());
             byte[] bytes = new byte[Config.getBufferSize()];
 
             // Read in the bytes
-            long offset = 0;
+            long offset = selectedFile.getPosition();
+            int readLength = selectedFile.getLimit() - offset > bytes.length ? bytes.length : (int) (selectedFile.getLimit() - offset);
+            is.skip(selectedFile.getPosition());
             int numRead;
-            while (offset < length && (numRead = is.read(bytes, 0, bytes.length)) >= 0) {
+            while (offset < selectedFile.getLimit() && (numRead = is.read(bytes, 0, readLength)) >= 0) {
                 offset += numRead;
+                readLength = selectedFile.getLimit() - offset > bytes.length ? bytes.length : (int) (selectedFile.getLimit() - offset);
                 dout.write(bytes, 0, numRead);
                 dout.flush();
             }
             //System.out.println("total send bytes = " + offset);
             // Ensure all the bytes have been read in
-            if (offset < length) {
+            if (offset < selectedFile.getLimit()) {
                 throw new IOException("Could not completely transfer file " + selectedFile.getName());
             }
             mSocket.shutdownOutput();

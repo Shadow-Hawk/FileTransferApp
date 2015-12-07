@@ -1,8 +1,6 @@
 package edu.thss.tcp.nio;
 
-import edu.thss.Config;
 import java.io.DataOutputStream;
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.SocketAddress;
@@ -12,16 +10,19 @@ import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import edu.thss.Config;
+import edu.thss.tcp.FileSplit;
+
 /**
  *
  * @author Stephan
  */
 public final class FileSendHandler implements Runnable {
 
-    private final File selectedFile; 
+    private final FileSplit selectedFile;
     private final SocketAddress address; 
     
-    public FileSendHandler(File file, SocketAddress address) {
+    public FileSendHandler(FileSplit file, SocketAddress address) {
         this.selectedFile = file; 
         this.address = address; 
     }
@@ -33,7 +34,7 @@ public final class FileSendHandler implements Runnable {
         SocketChannel socketChannel = null;
         DataOutputStream dout = null;
         try {
-            fileChannel = new FileInputStream(this.selectedFile).getChannel();
+            fileChannel = new FileInputStream(this.selectedFile.getFile()).getChannel();
             socketChannel = SocketChannel.open();
             socketChannel.setOption(StandardSocketOptions.TCP_NODELAY, true);
             socketChannel.setOption(StandardSocketOptions.SO_SNDBUF, Config.getSocketBufferSize());
@@ -44,18 +45,19 @@ public final class FileSendHandler implements Runnable {
 
             dout = new DataOutputStream(socketChannel.socket().getOutputStream());
 
-            long fileSize = fileChannel.size(), 
+            long fileSize = selectedFile.getLimit() - selectedFile.getPosition(),
                     missingBytes = fileSize, 
                     transferredBytes;
             
             // Write meta data (file name and size)
-            dout.writeUTF(selectedFile.getAbsolutePath().substring(Config.getSourceDir().length()).replaceAll("\\\\", "/"));
+            dout.writeByte(selectedFile.getTotal());
+            dout.writeUTF(selectedFile.getName());
             dout.writeLong(fileSize); 
             dout.flush(); 
             
             // Actual file
             do {
-                transferredBytes = fileChannel.transferTo(fileSize - missingBytes, missingBytes, socketChannel); 
+                transferredBytes = fileChannel.transferTo(selectedFile.getLimit() - missingBytes, missingBytes, socketChannel);
                 missingBytes -= transferredBytes; 
             } while(missingBytes != 0 && transferredBytes != 0);
             

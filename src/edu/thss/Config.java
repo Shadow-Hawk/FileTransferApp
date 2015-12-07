@@ -53,4 +53,8 @@ public class Config {
     public static int getHandlerMode() {
         return Integer.parseInt(resourceBundle.getString("HandlerMode"));
     }
+
+    public static long getMaxFileSize() {
+        return Long.parseLong(resourceBundle.getString("MaxFileSize")) * 1024 * 1024;
+    }
 }

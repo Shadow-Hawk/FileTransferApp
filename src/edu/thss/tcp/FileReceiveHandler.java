@@ -20,6 +20,7 @@ public class FileReceiveHandler implements Runnable {
 
     @Override
     public void run() {
+        int numberOfParts  = 1;
         String fileName = "";
         BufferedOutputStream output = null;
         DataInputStream input = null;
@@ -27,6 +28,7 @@ public class FileReceiveHandler implements Runnable {
             //System.out.println("_mSocket getReceiveBufferSize= " + _mSocket.getReceiveBufferSize());
             // get file meta information
             input = new DataInputStream(_mSocket.getInputStream());
+            numberOfParts = input.readByte();
             fileName = input.readUTF();
             long fileLength = input.readLong(); // number of total bytes
             DirectoryManager.constructDirectories(fileName);
@@ -72,5 +74,8 @@ public class FileReceiveHandler implements Runnable {
             }
         }
 
+        if (numberOfParts > 1 && fileName.contains(".part_")) {
+            FileConcatenator.processParts(fileName, numberOfParts);
+        }
     }
 }

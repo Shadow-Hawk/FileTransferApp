@@ -1,9 +1,5 @@
 package edu.thss.tcp.nio;
 
-import edu.thss.Config;
-import edu.thss.DirectoryManager;
-import edu.thss.ZipUtil;
-
 import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -13,6 +9,11 @@ import java.nio.channels.FileChannel;
 import java.nio.channels.SocketChannel;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import edu.thss.Config;
+import edu.thss.DirectoryManager;
+import edu.thss.ZipUtil;
+import edu.thss.tcp.FileConcatenator;
 
 /**
  * @author Stephan
@@ -33,6 +34,7 @@ public class FileReceiveHandler implements Runnable {
             assert (socketChannel != null);
 
             // Receiving meta data and prepare receiving
+            int numberOfParts = din.readByte();
             String fileName = din.readUTF();
             String fullFileName = DirectoryManager.concat(Config.getDestinationDir(), fileName);
             long fileSize = din.readLong(),
@@ -52,6 +54,8 @@ public class FileReceiveHandler implements Runnable {
             if (fileName.endsWith(Config.getZipFile() + Config.ZipExtension)) {
                 ZipUtil.unzip(fullFileName, Config.getDestinationDir() + File.separator + fileName.substring(0, fileName.lastIndexOf(Config.ZipExtension)) + File.separator);
                 DirectoryManager.cleanTempFile(Config.getDestinationDir(), fileName);
+            } else if (numberOfParts > 1 && fileName.contains(".part_")) {
+                FileConcatenator.processParts(fileName, numberOfParts);
             }
         } catch (IOException ex) {
             Logger.getLogger(FileReceiveHandler.class.getName()).log(Level.SEVERE, null, ex);

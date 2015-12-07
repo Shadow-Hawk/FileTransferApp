@@ -71,7 +71,7 @@ public class FileTransferServer {
             String command = new String(recvPackt.getData(), 0, recvPackt.getLength());
             if (command.startsWith(CommandEnum.Total$.toString())) {
                 total = Integer.parseInt(command.substring(CommandEnum.Total$.toString().length()));
-                System.out.println("total = " + total);
+//                System.out.println("total = " + total);
 
                 new Thread(new Runnable() {
                     @Override

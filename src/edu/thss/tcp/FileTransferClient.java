@@ -1,6 +1,5 @@
 package edu.thss.tcp;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -30,15 +29,15 @@ public class FileTransferClient {
 
     private void listen() {
         ExecutorService executor = Executors.newSingleThreadExecutor();
-        Future<List<File>> future = executor.submit(new Callable<List<File>>() {
+        Future<List<FileSplit>> future = executor.submit(new Callable<List<FileSplit>>() {
             @Override
-            public List<File> call() throws Exception {
-                List<File> files = new ArrayList<>();
+            public List<FileSplit> call() throws Exception {
+                List<FileSplit> files = new ArrayList<>();
                 getFiles(files, Paths.get(Config.getSourceDir()));
                 return files;
             }
         });
-        List<File> files = null;
+        List<FileSplit> files = null;
         while (true) {
             try (DatagramSocket server = new DatagramSocket(Config.getSrcUdpPort())) {
                 byte[] recvBuf = new byte[128];
@@ -46,7 +45,7 @@ public class FileTransferClient {
                 server.receive(recvPacket);
 
                 String command = new String(recvPacket.getData(), 0, recvPacket.getLength());
-                System.out.println("command = " + command);
+//                System.out.println("command = " + command);
                 if (CommandEnum.Start$.toString().equalsIgnoreCase(command)) {
                     int port = recvPacket.getPort();
                     InetAddress addr = recvPacket.getAddress();
@@ -61,8 +60,6 @@ public class FileTransferClient {
                     send(files);
                     break;
                 }
-
-
             } catch (Exception e) {
                 e.printStackTrace();
                 throw new RuntimeException(e);
@@ -70,14 +67,14 @@ public class FileTransferClient {
         }
     }
 
-    public void send(List<File> files) {
+    public void send(List<FileSplit> files) {
 
         SocketAddress address = new InetSocketAddress(Config.getDestinationHost(), Config.getDestPort());
         ExecutorService threadPool = Executors.newFixedThreadPool(Config.getThreadCount());
         CompletionService pool = new ExecutorCompletionService(threadPool);
 
         Object result = new Object();
-        for (File f : files) {
+        for (FileSplit f : files) {
             pool.submit(getHandlerImpl(f, address), result);
         }
 
@@ -90,27 +87,30 @@ public class FileTransferClient {
         } catch (InterruptedException e) {
             e.printStackTrace();
         } finally {
-            System.out.println("Cleaning");
+//            System.out.println("Cleaning");
             DirectoryManager.cleanTempFile(Config.getSourceDir(), Config.getZipFile() + Config.ZipExtension);
         }
-        System.out.println("end");
+//        System.out.println("end");
     }
 
-    private void getFiles(List<File> files, Path dir) {
+    private void getFiles(List<FileSplit> files, Path dir) {
         try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir)) {
             for (Path path : stream) {
                 if (path.toFile().isDirectory()) {
-                    //if (path.endsWith("huge_file") || path.endsWith("several_normal_files")) continue;
-                    //if (path.endsWith("huge_file")) continue;
                     if (path.endsWith(Config.getZipFile())) {
                         ZipUtil.zip(path.toString(), path.toString() + Config.ZipExtension);
-                        files.add(Paths.get(path.toString() + Config.ZipExtension).toFile());
+                        files.addAll(FileSplit.calculateParts(Paths.get(path.toString() + Config.ZipExtension).toFile()));
                         continue;
                     }
                     getFiles(files, path);
                 } else {
-                    files.add(path.toFile());
-                    //System.out.println(path.getFileName());
+                    List<FileSplit> subList = FileSplit.calculateParts(path.toFile());
+                    if (subList.size() > 1) {
+                        files.addAll(0, subList);
+                    } else {
+                        files.addAll(subList);
+                        //System.out.println(path.getFileName());
+                    }
                 }
             }
         } catch (IOException e) {
@@ -118,7 +118,7 @@ public class FileTransferClient {
         }
     }
 
-    private Runnable getHandlerImpl(File file, SocketAddress address) {
+    private Runnable getHandlerImpl(FileSplit file, SocketAddress address) {
         if (Config.getHandlerMode() == 1) {
             return new edu.thss.tcp.nio.FileSendHandler(file, address);
         } else {

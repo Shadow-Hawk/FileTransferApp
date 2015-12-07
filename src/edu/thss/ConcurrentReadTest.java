@@ -9,6 +9,8 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -26,8 +28,7 @@ public class ConcurrentReadTest {
 
         File sourceFile = new File(Src);
 
-        int parts = (int) (sourceFile.length() / size);
-        List<Runnable> runnables = new ArrayList<>(parts + 1);
+        List<Runnable> runnables = new ArrayList<>();
 
 
         long position = 0;
@@ -53,7 +54,7 @@ public class ConcurrentReadTest {
 
             for (int i = 1; i <= 3; i++) {
 
-                try (InputStream in = new BufferedInputStream(new FileInputStream(Dest + "." + i))) {
+                try (InputStream in = new BufferedInputStream(new FileInputStream(Dest + ".part" + i))) {
                     int actualRead;
                     long offset = 0;
                     while ((actualRead = in.read(buffer)) != -1) {
@@ -62,6 +63,7 @@ public class ConcurrentReadTest {
                     }
                     out.flush();
                 }
+                Files.delete(Paths.get(Dest + ".part" + i));
             }
         } catch (FileNotFoundException e) {
             e.printStackTrace();
@@ -102,7 +104,7 @@ public class ConcurrentReadTest {
         @Override
         public void run() {
             try (InputStream in = new BufferedInputStream(new FileInputStream(file));
-                 OutputStream out = new BufferedOutputStream(new FileOutputStream(Dest + "." + id))) {
+                 OutputStream out = new BufferedOutputStream(new FileOutputStream(Dest + ".part" + id))) {
                 byte[] buffer = new byte[1024 * 1024];
                 int actualRead;
                 int readLength = offset - position > buffer.length ? buffer.length : (int) (offset - position);
