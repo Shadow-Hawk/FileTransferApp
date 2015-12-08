@@ -62,12 +62,6 @@ public class FileTransferServer {
     private void init() {
 
         try (DatagramSocket socket = new DatagramSocket()) {
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    startServer(Config.getDestPort());
-                }
-            }).start();
 
             InetAddress address = InetAddress.getByName(Config.getSourceHost());
             DatagramPacket packet = new DatagramPacket(CommandEnum.Start$.toString().getBytes(), CommandEnum.Start$.toString().getBytes().length, address, Config.getSrcUdpPort());
@@ -79,6 +73,14 @@ public class FileTransferServer {
             if (command.startsWith(CommandEnum.Total$.toString())) {
                 total = Integer.parseInt(command.substring(CommandEnum.Total$.toString().length()));
 //                System.out.println("total = " + total);
+
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        startServer(Config.getDestPort());
+                    }
+                }).start();
+
                 packet = new DatagramPacket(CommandEnum.Ready$.toString().getBytes(), CommandEnum.Ready$.toString().getBytes().length, address, Config.getSrcUdpPort());
                 socket.send(packet);
                 //System.out.println("UDP time: " + (System.currentTimeMillis() - start) / 1000.0);
