@@ -5,6 +5,7 @@ import java.io.DataOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.ConnectException;
 import java.net.Socket;
 import java.net.SocketAddress;
 
@@ -19,7 +20,6 @@ public class FileSendHandler implements Runnable {
     public FileSendHandler(FileSplit file, SocketAddress address) {
         this.address = address;
         this.selectedFile = file;
-        mSocket = new Socket();
     }
 
     @Override
@@ -28,12 +28,24 @@ public class FileSendHandler implements Runnable {
         InputStream is = null;
 
         try {
-            mSocket.setSendBufferSize(Config.getSocketBufferSize());
-            mSocket.setReceiveBufferSize(Config.getSocketBufferSize());
-            mSocket.setTcpNoDelay(true);
-            mSocket.setSoLinger(true, 60);
-            mSocket.connect(address);
-
+            int retryCount = 0;
+            while (true) {
+                try {
+                    mSocket = new Socket();
+                    mSocket.setSendBufferSize(Config.getSocketBufferSize());
+                    mSocket.setReceiveBufferSize(Config.getSocketBufferSize());
+                    mSocket.setTcpNoDelay(true);
+                    mSocket.setSoLinger(true, 60);
+                    mSocket.connect(address);
+                    break;
+                } catch (ConnectException e) {
+                    retryCount++;
+                    System.out.println("retryCount = " + retryCount + "; Thread Name= " + Thread.currentThread().getName());
+                    if (retryCount > 10) {
+                        throw  e;
+                    }
+                }
+            }
             dout = new DataOutputStream(mSocket.getOutputStream());
             // Get the size of the file or part of file
             long length = selectedFile.getLimit() - selectedFile.getPosition();
