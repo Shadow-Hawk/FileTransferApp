@@ -1,11 +1,16 @@
 package edu.thss.tcp;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
+import java.net.Socket;
 import java.net.SocketAddress;
+import java.nio.channels.ServerSocketChannel;
+import java.nio.channels.SocketChannel;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -37,7 +42,17 @@ public class FileTransferServer {
                 return files;
             }
         });
+
+        if (Config.getUseTcpForCommand()) {
+            listenCommandViaTCP(executor, future);
+        } else {
+            listenCommandViaUDP(executor, future);
+        }
+    }
+
+    private void listenCommandViaUDP(ExecutorService executor, Future<List<FileSplit>> future) {
         List<FileSplit> files = null;
+        System.out.println("Server listening on UDP...");
         while (true) {
             try (DatagramSocket server = new DatagramSocket(Config.getSrcUdpPort())) {
                 byte[] recvBuf = new byte[128];
@@ -45,7 +60,7 @@ public class FileTransferServer {
                 server.receive(recvPacket);
 
                 String command = new String(recvPacket.getData(), 0, recvPacket.getLength());
-//                System.out.println("command = " + command);
+                System.out.println("command = " + command);
                 if (CommandEnum.Start$.toString().equalsIgnoreCase(command)) {
                     int port = recvPacket.getPort();
                     InetAddress addr = recvPacket.getAddress();
@@ -55,6 +70,7 @@ public class FileTransferServer {
                     byte[] replyBuf = reply.getBytes();
                     DatagramPacket replyPacket = new DatagramPacket(replyBuf, replyBuf.length, addr, port);
                     server.send(replyPacket);
+                    System.out.println("Total files: " + files.size());
                     executor.shutdown();
                 } else if (CommandEnum.Ready$.toString().equalsIgnoreCase(command)) {
                     send(files);
@@ -67,12 +83,65 @@ public class FileTransferServer {
         }
     }
 
+    private void listenCommandViaTCP(ExecutorService executor, Future<List<FileSplit>> future) {
+        List<FileSplit> files = null;
+
+        ServerSocketChannel socketChannel = null;
+        DataInputStream input = null;
+        DataOutputStream output = null;
+        Socket socket = null;
+        String command;
+        try {
+            socketChannel = ServerSocketChannel.open().bind(new InetSocketAddress(Config.getSrcUdpPort()));
+            System.out.println("Server started TCP...");
+
+
+            SocketChannel client = socketChannel.accept();
+            socket = client.socket();
+            input = new DataInputStream(socket.getInputStream());
+            output = new DataOutputStream(socket.getOutputStream());
+
+            while (true) {
+                command = input.readUTF();
+                System.out.println("command = " + command);
+
+                if (CommandEnum.Start$.toString().equalsIgnoreCase(command)) {
+                    files = future.get(5, TimeUnit.SECONDS);
+                    executor.shutdown();
+                    output.writeUTF(CommandEnum.Total$.toString() + files.size());
+                    output.flush();
+                    System.out.println("Total files: " + files.size());
+                } else if (CommandEnum.Ready$.toString().equalsIgnoreCase(command)) {
+                    send(files);
+                    break;
+                } else {
+                    continue;
+                }
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            try {
+                input.close();
+                output.close();
+                socket.close();
+                if (socketChannel.isOpen()) {
+                    socketChannel.close();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
     public void send(List<FileSplit> files) {
 
         SocketAddress address = new InetSocketAddress(Config.getDestinationHost(), Config.getDestPort());
         ExecutorService threadPool = Executors.newFixedThreadPool(Config.getThreadCount());
         CompletionService pool = new ExecutorCompletionService(threadPool);
 
+        System.out.println("Started sending files...");
         Object result = new Object();
         for (FileSplit f : files) {
             pool.submit(getHandlerImpl(f, address), result);

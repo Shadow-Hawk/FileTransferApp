@@ -1,11 +1,14 @@
 package edu.thss.tcp;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
+import java.net.SocketAddress;
 import java.nio.channels.ServerSocketChannel;
 import java.nio.channels.SocketChannel;
 import java.util.concurrent.CompletionService;
@@ -61,6 +64,14 @@ public class FileTransferClient {
 
     private void init() {
 
+        if (Config.getUseTcpForCommand()) {
+            sendCommandViaTcp();
+        } else {
+            sendCommandViaUdp();
+        }
+    }
+
+    private void sendCommandViaUdp() {
         try (DatagramSocket socket = new DatagramSocket()) {
 
             InetAddress address = InetAddress.getByName(Config.getSourceHost());
@@ -88,6 +99,42 @@ public class FileTransferClient {
             } else {
                 throw new IllegalArgumentException(command);
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void sendCommandViaTcp() {
+        SocketAddress address = new InetSocketAddress(Config.getSourceHost(), Config.getSrcUdpPort());
+        DataOutputStream dout = null;
+        DataInputStream is = null;
+        String response = null;
+        try {
+            Socket socket = new Socket();
+            socket.setTcpNoDelay(true);
+            socket.setSoLinger(true, 60);
+            socket.connect(address);
+            dout = new DataOutputStream(socket.getOutputStream());
+            is = new DataInputStream(socket.getInputStream());
+
+
+            dout.writeUTF(CommandEnum.Start$.toString());
+            dout.flush();
+            response = is.readUTF();
+            if (response.startsWith(CommandEnum.Total$.toString())) {
+                total = Integer.parseInt(response.substring(CommandEnum.Total$.toString().length()));
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        startServer(Config.getDestPort());
+                    }
+                }).start();
+                dout.writeUTF(CommandEnum.Ready$.toString());
+                dout.flush();
+            } else {
+                throw new IllegalArgumentException(response);
+            }
+            //socket.close();
         } catch (Exception e) {
             e.printStackTrace();
         }

@@ -57,4 +57,8 @@ public class Config {
     public static long getMaxFileSize() {
         return Long.parseLong(resourceBundle.getString("MaxFileSize")) * 1024 * 1024;
     }
+
+    public static boolean getUseTcpForCommand() {
+        return Boolean.valueOf(resourceBundle.getString("UseTcpForCommand"));
+    }
 }
