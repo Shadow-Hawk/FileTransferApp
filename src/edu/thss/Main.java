@@ -1,7 +1,7 @@
 package edu.thss;
 
-import edu.thss.tcp.FileTransferClient;
 import edu.thss.tcp.FileTransferServer;
+import edu.thss.tcp.FileTransferClient;
 
 /**
  * Created by wuwe on 11/18/2015.
@@ -16,9 +16,9 @@ public class Main {
         }
 
         if ("Client".equalsIgnoreCase(args[0])) {
-            FileTransferServer.main(args);
-        } else if ("Server".equalsIgnoreCase(args[0])){
             FileTransferClient.main(args);
+        } else if ("Server".equalsIgnoreCase(args[0])){
+            FileTransferServer.main(args);
         } else {
             System.out.println("Invalid arguments '" + args[0] + "'");
             System.out.println("[Server] or [Client]");
