@@ -2,6 +2,7 @@ package edu.thss.tcp;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.InputStream;
@@ -53,7 +54,16 @@ public class FileConcatenator {
     private static void concat(String originalFileName) {
 //        System.out.println("concatenating");
         TreeSet<String> partsReceived = map.get(originalFileName);
-        try (OutputStream os = new BufferedOutputStream(new FileOutputStream(DirectoryManager.concat(Config.getDestinationDir(), originalFileName)), Config.getBufferSize())) {
+
+        File fileToBeWrite = new File(DirectoryManager.concat(Config.getDestinationDir(), originalFileName));
+        String part1 = partsReceived.first();
+        if (part1.endsWith(".part_1")) {
+            partsReceived.pollFirst();
+            boolean success = new File(DirectoryManager.concat(Config.getDestinationDir(), part1)).renameTo(fileToBeWrite);
+            if (!success) throw new RuntimeException("File rename failed!!!");
+        }
+
+        try (OutputStream os = new BufferedOutputStream(new FileOutputStream(fileToBeWrite, true), Config.getBufferSize())) {
 
             byte[] buffer = new byte[Config.getBufferSize()];
 
