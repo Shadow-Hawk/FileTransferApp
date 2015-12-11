@@ -52,7 +52,6 @@ public class FileConcatenator {
     }
 
     private static void concat(String originalFileName) {
-//        System.out.println("concatenating");
         TreeSet<String> partsReceived = map.get(originalFileName);
 
         File fileToBeWrite = new File(DirectoryManager.concat(Config.getDestinationDir(), originalFileName));
