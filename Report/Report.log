@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/W32TeX) (format=pdflatex 2014.6.9)  12 DEC 2015 10:50
+This is pdfTeX, Version 3.1415926-2.5-1.40.14 (TeX Live 2013/W32TeX) (format=pdflatex 2014.6.9)  14 DEC 2015 12:58
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -665,26 +665,27 @@ LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <8> on input line 84.
 LaTeX Font Info:    External font `lmex10' loaded for size
 (Font)              <6> on input line 84.
-[3] (./Report.aux) ) 
+[3] [4] (./Report.aux) ) 
 Here is how much of TeX's memory you used:
  6352 strings out of 493308
  85318 string characters out of 6141368
- 190235 words of memory out of 5000000
+ 191235 words of memory out of 5000000
  9701 multiletter control sequences out of 15000+600000
  43319 words of font info for 52 fonts, out of 8000000 for 9000
  957 hyphenation exceptions out of 8191
- 38i,7n,47p,1226b,1089s stack positions out of 5000i,500n,10000p,200000b,80000s
-{c:/texlive/2013/texmf-dist/fonts/enc/dvips/lm/lm-mathit.en
-c}{c:/texlive/2013/texmf-dist/fonts/enc/dvips/lm/lm-rmtt.enc}{c:/texlive/2013/t
-exmf-dist/fonts/enc/dvips/lm/lm-rm.enc}<c:/texlive/2013/texmf-dist/fonts/type1/
-public/lm/lmbx12.pfb><c:/texlive/2013/texmf-dist/fonts/type1/public/lm/lmmi12.p
-fb><c:/texlive/2013/texmf-dist/fonts/type1/public/lm/lmr12.pfb><c:/texlive/2013
-/texmf-dist/fonts/type1/public/lm/lmr17.pfb><c:/texlive/2013/texmf-dist/fonts/t
-ype1/public/lm/lmtt10.pfb>
-Output written on Report.pdf (3 pages, 187676 bytes).
+ 38i,7n,47p,1871b,1089s stack positions out of 5000i,500n,10000p,200000b,80000s
+{c:/texlive/2013/texmf-dist/fonts/enc/dvips/lm/lm-maths
+y.enc}{c:/texlive/2013/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{c:/texlive/
+2013/texmf-dist/fonts/enc/dvips/lm/lm-rmtt.enc}{c:/texlive/2013/texmf-dist/font
+s/enc/dvips/lm/lm-rm.enc}<c:/texlive/2013/texmf-dist/fonts/type1/public/lm/lmbx
+12.pfb><c:/texlive/2013/texmf-dist/fonts/type1/public/lm/lmmi12.pfb><c:/texlive
+/2013/texmf-dist/fonts/type1/public/lm/lmr12.pfb><c:/texlive/2013/texmf-dist/fo
+nts/type1/public/lm/lmr17.pfb><c:/texlive/2013/texmf-dist/fonts/type1/public/lm
+/lmsy10.pfb><c:/texlive/2013/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
+Output written on Report.pdf (4 pages, 197937 bytes).
 PDF statistics:
- 40 PDF objects out of 1000 (max. 8388607)
- 27 compressed objects within 1 object stream
+ 48 PDF objects out of 1000 (max. 8388607)
+ 33 compressed objects within 1 object stream
  0 named destinations out of 1000 (max. 500000)
  6 words of extra memory for PDF output out of 10000 (max. 10000000)
 

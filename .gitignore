@@ -2,3 +2,8 @@ nbproject
 build
 build.xml
 FileTransferApp.iml
+*.aux
+*.log
+*.synctex.gz
+*.pdf
+/dist/
