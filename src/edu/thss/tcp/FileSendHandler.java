@@ -36,7 +36,7 @@ public class FileSendHandler implements Runnable {
                     mSocket.setReceiveBufferSize(Config.getSocketBufferSize());
                     mSocket.setTcpNoDelay(true);
                     mSocket.setSoLinger(true, 60);
-                    mSocket.connect(address);
+                    mSocket.connect(address, 1000);
                     break;
                 } catch (ConnectException e) {
                     retryCount++;
